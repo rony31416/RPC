@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive RPC Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f7;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .method-container {
+      margin-bottom: 15px;
+    }
+    label {
+      font-size: 14px;
+      color: #555;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Interactive RPC Client</h1>
+
+    <div class="method-container">
+      <label for="factorial-input">Factorial:</label>
+      <input id="factorial-input" type="number" placeholder="Enter a number">
+      <button onclick="invokeRPC('factorial', 'factorial-input')">Calculate Factorial</button>
+    </div>
+
+    <div class="method-container">
+      <label for="sum-input">Summation (comma-separated):</label>
+      <input id="sum-input" type="text" placeholder="Enter numbers (e.g., 10,20)">
+      <button onclick="invokeRPC('sum', 'sum-input')">Calculate Sum</button>
+    </div>
+
+    <div id="result">
+      <strong>Result:</strong> <span id="output">None</span>
+    </div>
+  </div>
+
+  <script>
+    async function invokeRPC(method, inputId) {
+      const input = document.getElementById(inputId).value.trim();
+      if (!input) {
+        alert("Please enter valid input!");
+        return;
+      }
+
+      // Parse the input into an array of parameters
+      const params = input.includes(',')
+        ? input.split(',').map(val => parseFloat(val.trim()))
+        : [parseFloat(input)];
+
+      try {
+        const response = await fetch('http://192.168.0.109:3000/rpc', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ method, params }),
+        });
+
+        const data = await response.json();
+        document.getElementById('output').innerText = data.result || "No result";
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('output').innerText = "Error occurred!";
+      }
+    }
+  </script>
+</body>
+</html>
